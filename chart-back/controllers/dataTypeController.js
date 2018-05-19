@@ -2,6 +2,7 @@ const dataTypes = {};
 const passport = require('passport');
 const User = require('../models/user');
 const DataType = require('../models/dataType');
+const Data = require('../models/data');
 const config = require('config');
 const langError = require('../lang/errors');
 const langSuc = require('../lang/success');
@@ -72,8 +73,9 @@ dataTypes.delete = async function(ctx, next) {
         } else {
             ctx.request.body.email = user.email;
 
-            let result = await DataType.remove({email: ctx.request.body.email, login: { $in: ctx.request.body.types}});
+            let result = await DataType.remove({email: ctx.request.body.email, login: ctx.request.body.types});
             if(result.ok){
+                await Data.remove({ email: user.email, type: ctx.request.body.types});
                 ctx.body = { token: user.getJWT(), message: { dataType: langSuc["The removal was successful."] } };
             }else{
                 ctx.body = { token: user.getJWT(), errorMessages: { dataType: langError["Deletion failed."] } };

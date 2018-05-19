@@ -1,3 +1,3 @@
-console.log(('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImN2YWl6ZUBnbWFpbC5jb20iLCJpYXQiOjE1MjYzNjQ3MDcsImV4cCI6MTUyNzM2NDcwN30.CKMfikeom0PscM0DRzQVD6Tk0TTgJ-UPkOvV3vdCqzE'
-    ===
-    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImN2YWl6ZUBnbWFpbC5jb20iLCJpYXQiOjE1MjYzNjQ3MzYsImV4cCI6MTUyNzM2NDczNn0.gh79kDw0ZoKobhQ4VxmEehIZv5Aq9RROb0b62Dtwn3I'));
+
+console.log(isNaN(Number("dsgsd")));
+

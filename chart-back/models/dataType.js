@@ -27,19 +27,6 @@ const typeSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// typeSchema.pre("update", function (next) {
-//     if(!!this._update['$push'].data){
-//         this._update['$push'].data = this._update['$push'].data.map(v => {
-//             if(!v.value){ next({name: "ValidationError", errors: { data: {message: langError["Specify the value to be stored."]} }}); }
-//             if(!v.time){ v.time = new Date(); }
-//             // v.time = new Date(v.time).toUTCString();
-//             v.time = new Date(v.time).toUTCString();
-//             return v;
-//         });
-//     }
-//     next();
-// });
-
 typeSchema.methods.toWeb = function(){
     let json = this.toJSON();
     json.id = this._id;//this is for the front end

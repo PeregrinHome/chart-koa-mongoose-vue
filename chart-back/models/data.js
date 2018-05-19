@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 const pick = require('lodash/pick');
 const langError = require('../lang/errors');
 
@@ -28,26 +29,32 @@ const dataSchema = new mongoose.Schema({
     }
 });
 
+dataSchema.plugin(mongoosePaginate);
+
 dataSchema.pre("save", function (next) {
     if(!this.time){ this.time = new Date(); }
+    if (isNaN(Date.parse(this.time)) === true) {
+        next({name: "ValidationError", errors: { data: {message: langError["Specify the correct time value."]} }});
+    }
     this.time = new Date(this.time).toUTCString();
+    next();
+});
 
-    // if(!!this._update['$push'].data){
-    //     this._update['$push'].data = this._update['$push'].data.map(v => {
-    //         if(!v.value){ next({name: "ValidationError", errors: { data: {message: langError["Specify the value to be stored."]} }}); }
-    //         if(!v.time){ v.time = new Date(); }
-    //         // v.time = new Date(v.time).toUTCString();
-    //         v.time = new Date(v.time).toUTCString();
-    //         return v;
-    //     });
-    // }
+dataSchema.pre("update", function (next) {
+    if(this._update['$set'].time){
+        if (isNaN(Date.parse(this._update['$set'].time)) === true) {
+            next({name: "ValidationError", errors: { data: {message: langError["Specify the correct time value."]} }});
+        }
+        this._update['$set'].time = new Date(this._update['$set'].time).toUTCString();
+    }
+    //TODO: Дописать валидацию value и проверку наличия type
     next();
 });
 
 dataSchema.methods.toWeb = function(){
     let json = this.toJSON();
     json.id = this._id;//this is for the front end
-    return pick(json, ['id', 'value', 'time']);
+    return pick(json, ['id', 'value', 'time', 'type']);
 };
 
 module.exports = mongoose.model('Data', dataSchema);

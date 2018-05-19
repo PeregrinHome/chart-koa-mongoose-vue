@@ -16,4 +16,6 @@ module.exports = {
   "Be sure to specify the data to save.": "Обязательно укажите данные для сохранения.",
   "Specify the data types.": "Укажите типы данных.",
   "Specify the correct data types to save the data.": "Укажите правильные типы данных, для сохранения данных.",
+  "Specify the correct data types.": "Укажите правильные типы данных.",
+  "For pagination, use only numbers with a value greater than 0.": "Для пагинации используйте только числа, со значением 0 и более.",
 };
