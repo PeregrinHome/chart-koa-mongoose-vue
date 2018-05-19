@@ -4,4 +4,5 @@ module.exports = {
     "Data types have not been created yet!": "Типы данных еще не создавались! Вы можете их создать.",
     "You have already created such a login.": "Такой логин вами уже создан. Используйте другой.",
     "The removal was successful.": "Удаление прошло успешно.",
+    "The data was successfully added.": "Данные были успешно добавлены.",
 };

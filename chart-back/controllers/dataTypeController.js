@@ -11,7 +11,7 @@ dataTypes.get = async function(ctx, next) {
         if (user === false) {
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."] }};
         } else {
-            let types = await DataType.find({ email: user.email }).slice('data',100);
+            let types = await DataType.find({ email: user.email });
             if(types.length !== 0){
                 types = types.map(type => type.toWeb());
                 ctx.body = { dataTypes: types, token: user.getJWT()};

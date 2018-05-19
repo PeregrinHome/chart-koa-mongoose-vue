@@ -15,4 +15,5 @@ module.exports = {
   "Specify the correct time value.": "Укажите правильное значение времени.",
   "Be sure to specify the data to save.": "Обязательно укажите данные для сохранения.",
   "Specify the data types.": "Укажите типы данных.",
+  "Specify the correct data types to save the data.": "Укажите правильные типы данных, для сохранения данных.",
 };

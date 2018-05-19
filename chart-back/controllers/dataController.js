@@ -3,6 +3,7 @@ const passport = require('passport');
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const DataType = require('../models/dataType');
+const Data = require('../models/data');
 const config = require('config');
 const langError = require('../lang/errors');
 const langSuc = require('../lang/success');
@@ -85,17 +86,27 @@ data.post = async function(ctx, next) {
         } else {
             //TODO: Валидность времени и значения не проверяется. Проверяется только их наличие.
             if(ctx.request.body.data){
+                let save = [];
+
                 for (let key in ctx.request.body.data){
-                    await DataType.update(
-                            {email: user.email, login: key},
-                            { $push: { data: ctx.request.body.data[key] }
-                        });
+                    let check = await DataType.findOne({ login: key, email: user.email});
+                    if(check){
+                        save = save.concat(ctx.request.body.data[key].map(v=>{
+                            v.type = check.login;
+                            v.email = check.email;
+                            return v;
+                        }));
+                    }else{
+                        ctx.body = { data: false, errorMessages: { data: langError["Specify the correct data types to save the data."] }, token: user.getJWT()};
+                        return;
+                    }
                 }
-                ctx.body = { token: user.getJWT() };
+                let data = await Data.create(save);
+                data = data.map(v => v.toWeb());
+                ctx.body = { data: data, message: { data: langSuc["The data was successfully added."]}, token: user.getJWT()};
             }else{
-                ctx.body = { dataTypes: false, errorMessages: { dataTypes: langError["Be sure to specify the data to save."] }, token: user.getJWT()};
+                ctx.body = { data: false, errorMessages: { data: langError["Be sure to specify the data to save."] }, token: user.getJWT()};
             }
-            ctx.body = { token: user.getJWT() };
         }
     })(ctx, next);
 };

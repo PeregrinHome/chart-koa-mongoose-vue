@@ -8,6 +8,7 @@ const langSuc = require('../lang/success');
 // });
 const request = require('request-promise');
 const User = require('../models/user');
+const Data = require('../models/data');
 const DataType = require('../models/dataType');
 const assert = require('assert');
 // const seed = require('../seed/index');
@@ -44,12 +45,12 @@ describe('RESTapi chart', () => {
         mongoose.connection.close();
         app.close();
     });
+    it('Remove all collection', async function() {
+        await User.remove({});
+        await DataType.remove({});
+        await Data.remove({});
+    });
     context('Users', function () {
-
-        it('Remove all collection', async function() {
-            await User.remove({});
-            await DataType.remove({});
-        });
         context('Check registration', function () {
             let options = {
                 method: 'POST',
@@ -365,53 +366,79 @@ describe('RESTapi chart', () => {
             });
             //TODO: Добавить рекурсивное удаление всех данных связанных с данным типом данных
         });
-    });
-    context('Data', function () {
-        it('The first data acquisition when there is no data', async function () {
-            await request({
-                method: 'DELETE',
-                uri: host+'/types',
-                simple: false,
-                headers: {
-                    Authorization: user.token
-                },
-                body: {
-                    Authorization: user.token,
-                    types: ["voltage"]
-                },
-                json: true // Automatically stringifies the body to JSON
-            });
-
+        context('Add types', function () {
             let options = {
-                method: 'GET',
-                uri: host+'/data',
+                method: 'POST',
+                uri: host+'/types',
                 simple: false,
                 headers: {},
                 body: {},
                 json: true // Automatically stringifies the body to JSON
             };
             let results;
-            options.headers.Authorization = user.token;
-            options.body.Authorization = user.token;
-            options.body.types = [types[0].login, types[1].login, types[2].login];
-            results = await request(options);
-            user.token = results.token;
+            it('Save +2 new data type', async function () {
+                options.headers.Authorization = user.token;
+                options.body.Authorization = user.token;
+                options.body.name = types[0].name;
+                options.body.login = types[0].login;
+                results = await request(options);
+                user.token = results.token;
 
-            await request({
-                method: 'POST',
-                uri: host+'/types',
-                simple: false,
-                headers: {
-                    Authorization: user.token
-                },
-                body: {
-                    Authorization: user.token,
-                    login: types[2].login,
-                    name: types[2].name,
-                },
-                json: true // Automatically stringifies the body to JSON
+                options.headers.Authorization = user.token;
+                options.body.Authorization = user.token;
+                options.body.name = types[1].name;
+                options.body.login = types[1].login;
+                results = await request(options);
+                user.token = results.token;
             });
         });
+    });
+    context('Data', function () {
+        // it('The first data acquisition when there is no data', async function () {
+        //     await request({
+        //         method: 'DELETE',
+        //         uri: host+'/types',
+        //         simple: false,
+        //         headers: {
+        //             Authorization: user.token
+        //         },
+        //         body: {
+        //             Authorization: user.token,
+        //             types: ["voltage"]
+        //         },
+        //         json: true // Automatically stringifies the body to JSON
+        //     });
+        //
+        //     let options = {
+        //         method: 'GET',
+        //         uri: host+'/data',
+        //         simple: false,
+        //         headers: {},
+        //         body: {},
+        //         json: true // Automatically stringifies the body to JSON
+        //     };
+        //     let results;
+        //     options.headers.Authorization = user.token;
+        //     options.body.Authorization = user.token;
+        //     options.body.types = [types[0].login, types[1].login, types[2].login];
+        //     results = await request(options);
+        //     user.token = results.token;
+        //
+        //     await request({
+        //         method: 'POST',
+        //         uri: host+'/types',
+        //         simple: false,
+        //         headers: {
+        //             Authorization: user.token
+        //         },
+        //         body: {
+        //             Authorization: user.token,
+        //             login: types[2].login,
+        //             name: types[2].name,
+        //         },
+        //         json: true // Automatically stringifies the body to JSON
+        //     });
+        // });
         context('Data POST', function () {
             let options = {
                 method: 'POST',
@@ -427,6 +454,19 @@ describe('RESTapi chart', () => {
                 options.headers.Authorization = user.token;
                 options.body.Authorization = user.token;
                 options.body.data = {};
+                options.body.data[types[0].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                    { value: 124 },
+                ];
+                options.body.data[types[1].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                ];
                 options.body.data[types[2].login] = [
                     { value: 1241, time: new Date() },
                     { value: 141, time: new Date() },
@@ -436,155 +476,233 @@ describe('RESTapi chart', () => {
                 assert.equal(results.statusCode, 200);
                 user.token = results.body.token;
             });
-            it('Adding data without specifying time', async function () {
-                options.headers.Authorization = user.token;
-                options.body.Authorization = user.token;
-                options.body.data = {};
-                options.body.data[types[2].login] = [
-                    { value: 1241 },
-                    { value: 141 },
-                    { value: 124 },
-                    { value: 124 },
-                ];
-                results = await request(options);
-                assert.equal(results.statusCode, 200);
-                user.token = results.body.token;
-            });
-            it('Validation adding data: no value', async function () {
-                options.headers.Authorization = user.token;
-                options.body.Authorization = user.token;
-                options.body.data = {};
-                options.body.data[types[2].login] = [
-                    { },
-                    { value: 141 },
-                    { value: 124 },
-                    { value: 124 },
-                ];
-                results = await request(options);
-                assert.equal(!!results.body.errorMessages, true);
-            });
-            it('Add a data set consisting of 10 values for each of the 3 data types', async function () {
-
-                let optionsPOST = {
-                    method: 'POST',
-                    uri: host+'/types',
-                    simple: false,
-                    headers: {},
-                    body: {},
-                    json: true // Automatically stringifies the body to JSON
-                };
-                let resultPOST;
-                optionsPOST.headers.Authorization = user.token;
-                optionsPOST.body.Authorization = user.token;
-                optionsPOST.body.name = types[0].name;
-                optionsPOST.body.login = types[0].login;
-                resultPOST = await request(optionsPOST);
-                user.token = resultPOST.token;
-
-                optionsPOST.headers.Authorization = user.token;
-                optionsPOST.body.Authorization = user.token;
-                optionsPOST.body.name = types[1].name;
-                optionsPOST.body.login = types[1].login;
-                resultPOST = await request(optionsPOST);
-                user.token = resultPOST.token;
-
+            it('Adding data without a value', async function () {
                 options.headers.Authorization = user.token;
                 options.body.Authorization = user.token;
                 options.body.data = {};
                 options.body.data[types[0].login] = [
-                    { value: 1 },
-                    { value: 2 },
-                    { value: 3 },
-                    { value: 4 },
-                    { value: 5 },
-                    { value: 6 },
-                    { value: 7 },
-                    { value: 8 },
-                    { value: 9 },
-                    { value: 10 },
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { time: new Date() },
+                    { value: 124 },
+                    { value: 124 },
                 ];
-                results = await request(options);
-                assert.equal(results.statusCode, 200);
-                user.token = results.body.token;
-
-                options.headers.Authorization = user.token;
-                options.body.Authorization = user.token;
-                options.body.data = {};
                 options.body.data[types[1].login] = [
-                    { value: 1, time: new Date(2018, 1, 1, 1, 10) },
-                    { value: 2, time: new Date(2018, 2, 2, 1, 10) },
-                    { value: 3, time: new Date(2018, 2, 3, 1, 10) },
-                    { value: 4, time: new Date(2018, 2, 4, 1, 10) },
-                    { value: 5, time: new Date(2018, 2, 5, 1, 10) },
-                    { value: 6, time: new Date(2018, 2, 6, 1, 10) },
-                    { value: 7, time: new Date(2018, 3, 7, 1, 10) },
-                    { value: 8, time: new Date(2018, 4, 8, 1, 10) },
-                    { value: 9, time: new Date(2018, 5, 9, 1, 10) },
-                    { value: 10, time: new Date(2018, 8, 10, 1, 10) },
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                ];
+                options.body.data[types[2].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
                 ];
                 results = await request(options);
-                assert.equal(results.statusCode, 200);
-                user.token = results.body.token;
-
+                assert.notEqual(results.statusCode, 200);
+            });
+            it('Bringing text data representation to a numeric representation.', async function () {
                 options.headers.Authorization = user.token;
                 options.body.Authorization = user.token;
                 options.body.data = {};
+                options.body.data[types[0].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                    { value: 124 },
+                ];
+                options.body.data[types[1].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                ];
                 options.body.data[types[2].login] = [
-                    { value: 1, time: new Date(2018, 1, 1, 1, 10) },
-                    { value: 2, time: new Date(2018, 2, 2, 1, 10) },
-                    { value: 3, time: new Date(2018, 2, 3, 1, 10) },
-                    { value: 4, time: new Date(2018, 2, 4, 1, 10) },
-                    { value: 5, time: new Date(2018, 2, 5, 1, 10) },
-                    { value: 6, time: new Date(2018, 2, 6, 1, 10) },
-                    { value: 7, time: new Date(2018, 3, 7, 1, 10) },
-                    { value: 8, time: new Date(2018, 4, 8, 1, 10) },
-                    { value: 9, time: new Date(2018, 5, 9, 1, 10) },
-                    { value: 10, time: new Date(2018, 8, 10, 1, 10) },
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: "12345679" },
                 ];
                 results = await request(options);
                 assert.equal(results.statusCode, 200);
                 user.token = results.body.token;
             });
-        });
-        context('Data GET', function () {
-            let options = {
-                method: 'GET',
-                uri: host+'/data',
-                simple: false,
-                headers: {},
-                body: {},
-                json: true // Automatically stringifies the body to JSON
-            };
-            let results;
-            it('Получение набора данных без указания границы времени и выборкой из 5 элементов', async function () {
+            it('Adding incorrect data: incorrect value', async function () {
                 options.headers.Authorization = user.token;
                 options.body.Authorization = user.token;
-                options.body.types = [types[0].login, types[1].login, types[2].login];
-                options.body.length = 5;
+                options.body.data = {};
+                options.body.data[types[0].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                    { value: 124 },
+                ];
+                options.body.data[types[1].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: 124 },
+                ];
+                options.body.data[types[2].login] = [
+                    { value: 1241, time: new Date() },
+                    { value: 141, time: new Date() },
+                    { value: "ecfsegseg" },
+                ];
                 results = await request(options);
-                // console.log(results.dataTypes);
-                // assert.equal(!!results.dataTypes[0].data, true);
-                user.token = results.token;
+                // assert.notEqual(results.statusCode, 200);
+                console.log(results.body);
+                user.token = results.body.token;
             });
-            it('Получение набора данных с указанием левой и правой границы времени', async function () {
-                options.headers.Authorization = user.token;
-                options.body.Authorization = user.token;
-                options.body.types = [types[0].login, types[1].login, types[2].login];
-                options.body.length = 100;
-                options.body.start = new Date(2018, 4, 7, 1, 10);
-                options.body.end = new Date(2018, 6, 7, 1, 10);
-                results = await request(options);
-                // console.log(results.dataTypes);
-                // assert.equal(!!results.dataTypes[1].data, true);
-                user.token = results.token;
-            });
-            // it('Получение набора данных с указанием правой границы времени', async function () {
-            //
+            // it('Adding data without specifying time', async function () {
+            //     options.headers.Authorization = user.token;
+            //     options.body.Authorization = user.token;
+            //     options.body.data = {};
+            //     options.body.data[types[2].login] = [
+            //         { value: 1241 },
+            //         { value: 141 },
+            //         { value: 124 },
+            //         { value: 124 },
+            //     ];
+            //     results = await request(options);
+            //     assert.equal(results.statusCode, 200);
+            //     user.token = results.body.token;
             // });
-            // it('Получение набора данных с указанием левой и правой границы времени', async function () {
+            // it('Validation adding data: no value', async function () {
+            //     options.headers.Authorization = user.token;
+            //     options.body.Authorization = user.token;
+            //     options.body.data = {};
+            //     options.body.data[types[2].login] = [
+            //         { },
+            //         { value: 141 },
+            //         { value: 124 },
+            //         { value: 124 },
+            //     ];
+            //     results = await request(options);
+            //     assert.equal(!!results.body.errorMessages, true);
+            // });
+            // it('Add a data set consisting of 10 values for each of the 3 data types', async function () {
             //
+            //     let optionsPOST = {
+            //         method: 'POST',
+            //         uri: host+'/types',
+            //         simple: false,
+            //         headers: {},
+            //         body: {},
+            //         json: true // Automatically stringifies the body to JSON
+            //     };
+            //     let resultPOST;
+            //     optionsPOST.headers.Authorization = user.token;
+            //     optionsPOST.body.Authorization = user.token;
+            //     optionsPOST.body.name = types[0].name;
+            //     optionsPOST.body.login = types[0].login;
+            //     resultPOST = await request(optionsPOST);
+            //     user.token = resultPOST.token;
+            //
+            //     optionsPOST.headers.Authorization = user.token;
+            //     optionsPOST.body.Authorization = user.token;
+            //     optionsPOST.body.name = types[1].name;
+            //     optionsPOST.body.login = types[1].login;
+            //     resultPOST = await request(optionsPOST);
+            //     user.token = resultPOST.token;
+            //
+            //     options.headers.Authorization = user.token;
+            //     options.body.Authorization = user.token;
+            //     options.body.data = {};
+            //     options.body.data[types[0].login] = [
+            //         { value: 1 },
+            //         { value: 2 },
+            //         { value: 3 },
+            //         { value: 4 },
+            //         { value: 5 },
+            //         { value: 6 },
+            //         { value: 7 },
+            //         { value: 8 },
+            //         { value: 9 },
+            //         { value: 10 },
+            //     ];
+            //     results = await request(options);
+            //     assert.equal(results.statusCode, 200);
+            //     user.token = results.body.token;
+            //
+            //     options.headers.Authorization = user.token;
+            //     options.body.Authorization = user.token;
+            //     options.body.data = {};
+            //     options.body.data[types[1].login] = [
+            //         { value: 1, time: new Date(2018, 1, 1, 1, 10) },
+            //         { value: 2, time: new Date(2018, 2, 2, 1, 10) },
+            //         { value: 3, time: new Date(2018, 2, 3, 1, 10) },
+            //         { value: 4, time: new Date(2018, 2, 4, 1, 10) },
+            //         { value: 5, time: new Date(2018, 2, 5, 1, 10) },
+            //         { value: 6, time: new Date(2018, 2, 6, 1, 10) },
+            //         { value: 7, time: new Date(2018, 3, 7, 1, 10) },
+            //         { value: 8, time: new Date(2018, 4, 8, 1, 10) },
+            //         { value: 9, time: new Date(2018, 5, 9, 1, 10) },
+            //         { value: 10, time: new Date(2018, 8, 10, 1, 10) },
+            //     ];
+            //     results = await request(options);
+            //     assert.equal(results.statusCode, 200);
+            //     user.token = results.body.token;
+            //
+            //     options.headers.Authorization = user.token;
+            //     options.body.Authorization = user.token;
+            //     options.body.data = {};
+            //     options.body.data[types[2].login] = [
+            //         { value: 1, time: new Date(2018, 1, 1, 1, 10) },
+            //         { value: 2, time: new Date(2018, 2, 2, 1, 10) },
+            //         { value: 3, time: new Date(2018, 2, 3, 1, 10) },
+            //         { value: 4, time: new Date(2018, 2, 4, 1, 10) },
+            //         { value: 5, time: new Date(2018, 2, 5, 1, 10) },
+            //         { value: 6, time: new Date(2018, 2, 6, 1, 10) },
+            //         { value: 7, time: new Date(2018, 3, 7, 1, 10) },
+            //         { value: 8, time: new Date(2018, 4, 8, 1, 10) },
+            //         { value: 9, time: new Date(2018, 5, 9, 1, 10) },
+            //         { value: 10, time: new Date(2018, 8, 10, 1, 10) },
+            //     ];
+            //     results = await request(options);
+            //     assert.equal(results.statusCode, 200);
+            //     user.token = results.body.token;
             // });
         });
+        // context('Data GET', function () {
+        //     // let options = {
+        //     //     method: 'GET',
+        //     //     uri: host+'/data',
+        //     //     simple: false,
+        //     //     headers: {},
+        //     //     body: {},
+        //     //     json: true // Automatically stringifies the body to JSON
+        //     // };
+        //     // let results;
+        //     // it('Получение набора данных без указания границы времени и выборкой из 5 элементов', async function () {
+        //     //     options.headers.Authorization = user.token;
+        //     //     options.body.Authorization = user.token;
+        //     //     options.body.types = [types[0].login, types[1].login, types[2].login];
+        //     //     options.body.length = 5;
+        //     //     results = await request(options);
+        //     //     // console.log(results.dataTypes);
+        //     //     // assert.equal(!!results.dataTypes[0].data, true);
+        //     //     user.token = results.token;
+        //     // });
+        //     // it('Получение набора данных с указанием левой и правой границы времени', async function () {
+        //     //     options.headers.Authorization = user.token;
+        //     //     options.body.Authorization = user.token;
+        //     //     options.body.types = [types[0].login, types[1].login, types[2].login];
+        //     //     options.body.length = 100;
+        //     //     options.body.start = new Date(2018, 4, 7, 1, 10);
+        //     //     options.body.end = new Date(2018, 6, 7, 1, 10);
+        //     //     results = await request(options);
+        //     //     // console.log(results.dataTypes);
+        //     //     // assert.equal(!!results.dataTypes[1].data, true);
+        //     //     user.token = results.token;
+        //     // });
+        //     // it('Получение набора данных с указанием правой границы времени', async function () {
+        //     //
+        //     // });
+        //     // it('Получение набора данных с указанием левой и правой границы времени', async function () {
+        //     //
+        //     // });
+        // });
         // context('Data UPDATE', function () {
         //     it('Обновление данных по ID', async function () {
         //
