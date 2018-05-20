@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.10",
+    "material-design-icons-iconfont": "^3.0.3",
     "vue": "^2.5.16",
     "vuetify": "^1.0.17"
   },

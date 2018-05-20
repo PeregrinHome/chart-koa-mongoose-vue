@@ -1,57 +1,71 @@
 <template>
-  <div id="app">
-    <v-app id="inspire">
-      <v-content>
-        <v-container fluid fill-height>
-          <v-layout align-center justify-center>
-            <v-flex xs12 sm8 md4>
-              <v-card class="elevation-12">
-                <v-toolbar dark color="primary">
-                  <v-toolbar-title>Login form</v-toolbar-title>
-                  <v-spacer></v-spacer>
-                  <v-tooltip bottom>
-                    <v-btn
-                            icon
-                            large
-                            :href="source"
-                            target="_blank"
-                            slot="activator"
-                    >
-                      <v-icon large>code</v-icon>
-                    </v-btn>
-                    <span>Source</span>
-                  </v-tooltip>
-                </v-toolbar>
-                <v-card-text>
-                  <v-form>
-                    <v-text-field prepend-icon="person" name="login" label="Login" type="text"></v-text-field>
-                    <v-text-field prepend-icon="lock" name="password" label="Password" id="password" type="password"></v-text-field>
-                  </v-form>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="primary">Login</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-content>
+    <v-app id="inspire" dark>
+        <v-navigation-drawer
+                v-model="drawer"
+                clipped
+                fixed
+                app
+        >
+            <v-list dense>
+                <v-list-tile @click="">
+                    <v-list-tile-action>
+                        <v-icon>dashboard</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                        <v-list-tile-title>Dashboard</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile @click="">
+                    <v-list-tile-action>
+                        <v-icon>settings</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                        <v-list-tile-title>Settings</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+            </v-list>
+        </v-navigation-drawer>
+        <v-toolbar app fixed clipped-left>
+            <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+            <v-toolbar-title>Application</v-toolbar-title>
+        </v-toolbar>
+        <v-content>
+            <v-container fluid fill-height>
+                <v-layout justify-center align-center>
+                    <v-flex shrink>
+
+
+
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-content>
+        <v-footer app fixed>
+            <span>&copy; 2017</span>
+        </v-footer>
     </v-app>
-  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+    import Vue from 'vue';
+    import Vuetify from 'vuetify';
+    import 'vuetify/dist/vuetify.min.css';
+    import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
-// vuetify
+    Vue.use(Vuetify);
 
-export default {
-  name: 'app',
-  components: {
-    HelloWorld
-  }
-}
+
+    export default {
+        name: 'app',
+        data: () => {
+            return {
+                drawer: true
+            };
+        },
+        components: {
+
+        }
+    }
 </script>
 
 <style>
