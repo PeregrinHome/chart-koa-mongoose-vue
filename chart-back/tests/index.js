@@ -188,9 +188,7 @@ describe('RESTapi chart', () => {
                 assert.equal(results.user.email, user.email);
                 user.token = results.token;
             });
-
-            // TODO: Дописать удаление и изменение аккаунта
-
+            // TODO: Дописать удаление и изменение аккаунта. Сейчас реализовано мягкое удаление.
         });
     });
     context('Data Types', function () {
@@ -364,7 +362,6 @@ describe('RESTapi chart', () => {
                 results = await request(options);
                 user.token = results.token;
             });
-            //TODO: Добавить рекурсивное удаление всех данных связанных с данным типом данных
         });
         context('Add types', function () {
             let options = {
