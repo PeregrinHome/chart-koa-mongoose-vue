@@ -731,7 +731,6 @@ describe('RESTapi chart', () => {
                 options.body.types = [types[0].login, types[1].login];
                 results = await request(options);
                 assert.equal(results.statusCode, 200);
-                console.log(results.body);
                 user.token = results.body.token;
             });
             it('Remove the data type validation removal of all data related to this type.', async function () {
@@ -752,6 +751,24 @@ describe('RESTapi chart', () => {
                 results = await request(options);
                 assert.equal(results.statusCode, 200);
             });
+        });
+    });
+    context('User', function () {
+        it('Soft deletion of a user.', async function() {
+            let options = {
+                method: 'DELETE',
+                uri: host+'/user',
+                simple: false,
+                headers: {},
+                body: {},
+                resolveWithFullResponse: true,
+                json: true // Automatically stringifies the body to JSON
+            };
+            let results;
+            options.headers.Authorization = user.token;
+            options.body.Authorization = user.token;
+            results = await request(options);
+            assert.equal(results.statusCode, 200);
         });
     });
 });

@@ -7,12 +7,6 @@ const jwt = require('jsonwebtoken'); // аутентификация по JWT д
 const pick = require('lodash/pick');
 const langError = require('../lang/errors');
 
-const panelSchema = new mongoose.Schema({
-    typeData: {
-        type: mongoose.SchemaTypes.ObjectId
-    }
-});
-
 const userSchema = new mongoose.Schema({
     username: {
         type:     String,
@@ -31,7 +25,10 @@ const userSchema = new mongoose.Schema({
             }
         ]
     },
-    deleted: Boolean,
+    deleted: {
+        type: Boolean,
+        default: false
+    },
     passwordHash: {
         type: String,
         required: true
@@ -39,8 +36,7 @@ const userSchema = new mongoose.Schema({
     salt: {
         required: true,
         type: String
-    },
-    panel: [panelSchema]
+    }
 }, {
     timestamps: true
 });
@@ -81,7 +77,7 @@ userSchema.methods.getJWT = function(){
 userSchema.methods.toWeb = function(){
     let json = this.toJSON();
     json.id = this._id;//this is for the front end
-    return pick(json, ['username', 'email', 'panel']);
+    return pick(json, ['username', 'email']);
 };
 
 userSchema.methods.checkPassword = function(password) {

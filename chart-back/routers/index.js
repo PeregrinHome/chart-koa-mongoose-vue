@@ -10,6 +10,7 @@ const dataController = require('../controllers/dataController');
 // router.get('/', defaultController.index.get);
 
 //ROUTES USER
+router.delete('/user', authController.user.delete);
 router.post('/login', authController.login.post);
 router.post('/registration', authController.registration.post);
 router.get('/', authController.home.get);

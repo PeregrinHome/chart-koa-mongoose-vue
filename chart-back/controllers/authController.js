@@ -1,12 +1,14 @@
 const User = require('../models/user');
 const config = require('config');
 // const pick = require('lodash/pick');
-const login = {}, registration = {}, home = {};
+const login = {}, registration = {}, home = {}, user = {};
 const passport = require('passport');
 const jwt = require('jsonwebtoken'); // аутентификация по JWT для http
 const jwtsecret = config.get('secret'); // ключ для подписи JWT
 const langError = require('../lang/errors');
 const langSuc = require('../lang/success');
+
+//TODO: Реализовать сброс пароля по email
 
 login.post = async function(ctx, next) {
     await passport.authenticate('local', function (err, user) {
@@ -31,8 +33,20 @@ home.get = async function(ctx, next) {
         }
     })(ctx, next);
 };
+user.delete = async function(ctx, next) {
+    await passport.authenticate('jwt', function (err, user, message) {
+        if (user === false) {
+            ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]} };
+        } else {
+            user.deleted = true;
+            user.save();
+            ctx.body = { user: 'clear', redirect: '/login', message: { data: langSuc["The user is marked as deleted."] } };
+        }
+    })(ctx, next);
+};
 
 module.exports = {
+    user,
     login,
     registration,
     home

@@ -72,8 +72,8 @@ passport.use(new JwtStrategy(jwtOptions, async function (jwt_payload, done) {
 
     // console.log('JwtStrategy user', user);
 
-    if(!!user){
-        // Пользователь найден
+    if(!!user && !user.deleted){
+        // Пользователь найден и не удален
         done(null, user);
     }else{
         // Пользователь не найден
