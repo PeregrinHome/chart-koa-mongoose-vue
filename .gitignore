@@ -36,10 +36,14 @@ build/Release
 # Dependency directories
 chart-back/node_modules
 chart-back/jspm_packages
+chart-back/package-lock.json
+chart-front/package-lock.json
 chart-front/node_modules
 chart-front/jspm_packages
 node_modules/
 jspm_packages/
+
+.idea/
 
 # TypeScript v1 declaration files
 typings/
