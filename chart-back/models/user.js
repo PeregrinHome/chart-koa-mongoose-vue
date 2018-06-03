@@ -71,7 +71,7 @@ userSchema.virtual('password')
     });
 
 userSchema.methods.getJWT = function(){
-    let expiration_time = 1000000;
+    let expiration_time = 10; // seconds
     return "Bearer "+jwt.sign({email:this.email}, config.get('secret'), {expiresIn: expiration_time});
 };
 userSchema.methods.toWeb = function(){

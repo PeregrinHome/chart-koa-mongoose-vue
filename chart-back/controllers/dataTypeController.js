@@ -10,6 +10,7 @@ const langSuc = require('../lang/success');
 dataTypes.get = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."] }};
         } else {
             let types = await DataType.find({ email: user.email });
@@ -25,6 +26,7 @@ dataTypes.get = async function(ctx, next) {
 dataTypes.put = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."] }};
         } else {
             let saveData = {};
@@ -34,10 +36,10 @@ dataTypes.put = async function(ctx, next) {
                     saveData[key] = ctx.request.body[key];
                 }
             }
-            if(!!saveData.login &&
-                !!(await DataType.findOne({email: user.email, login: saveData.login}))
+            if(!!saveData.login && !!(await DataType.findOne({email: user.email, login: saveData.login}))
             ){
-                ctx.body = { token: user.getJWT(), dataType: false, message: { dataType: langSuc["You have already created such a login."] } };
+                ctx.statusCode = 400;
+                ctx.body = { token: user.getJWT(), dataType: false, message: { dataType: langError["You have already created such a login."] } };
             }else{
                 let type = await DataType.findOneAndUpdate({ email: user.email, login: ctx.params.login }, { $set: saveData}, { new: true });
                 ctx.body = { token: user.getJWT(), type: type.toWeb() };
@@ -51,6 +53,7 @@ dataTypes.put = async function(ctx, next) {
 dataTypes.post = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]}};
         } else {
             ctx.request.body.email = user.email;
@@ -61,6 +64,7 @@ dataTypes.post = async function(ctx, next) {
                 let type = await DataType.create(ctx.request.body);
                 ctx.body = { token:user.getJWT(), type: type.toWeb() };
             }else{
+                ctx.statusCode = 400;
                 ctx.body = { dataType: false, message: { dataType: langError["This data type login already exists"] }, token: user.getJWT()};
             }
         }
@@ -69,6 +73,7 @@ dataTypes.post = async function(ctx, next) {
 dataTypes.delete = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]}};
         } else {
             ctx.request.body.email = user.email;
@@ -78,6 +83,7 @@ dataTypes.delete = async function(ctx, next) {
                 await Data.remove({ email: user.email, type: ctx.request.body.types});
                 ctx.body = { token: user.getJWT(), message: { dataType: langSuc["The removal was successful."] } };
             }else{
+                ctx.statusCode = 400;
                 ctx.body = { token: user.getJWT(), errorMessages: { dataType: langError["Deletion failed."] } };
             }
         }

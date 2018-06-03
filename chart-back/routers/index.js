@@ -9,9 +9,14 @@ const dataController = require('../controllers/dataController');
 
 // router.get('/', defaultController.index.get);
 
+router.options('*', function (ctx, next) {
+    ctx.body = 'ok';
+});
+
 //ROUTES USER
 router.delete('/user', authController.user.delete);
 router.post('/login', authController.login.post);
+router.get('/login', authController.login.get);
 router.post('/registration', authController.registration.post);
 router.get('/', authController.home.get);
 

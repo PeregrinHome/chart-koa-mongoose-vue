@@ -1,5 +1,7 @@
 <template>
-    
+    <div class="">
+        TIPES
+    </div>
 </template>
 
 <script>

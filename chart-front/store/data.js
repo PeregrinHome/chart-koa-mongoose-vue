@@ -1,9 +1,6 @@
-import Vue from "vue";
-import Vuex from "vuex";
 
-Vue.use(Vuex);
-
-export const dataStore = new Vuex.Store({
+export const dataStore = {
+    namespaced: true,
     state: {
     },
     getters: {
@@ -12,4 +9,4 @@ export const dataStore = new Vuex.Store({
     },
     actions: {
     }
-});
+};

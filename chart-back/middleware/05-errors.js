@@ -4,8 +4,6 @@ exports.init = app => app.use(async (ctx, next) => {
   try {
     await next();
   } catch (e) {
-      console.log(e);
-      //TODO:Поставить правильные статус коды ошибок
       if (e.name === 'ValidationError') {
           let errorMessages = {};
           for(let key in e.errors) {
@@ -15,7 +13,7 @@ exports.init = app => app.use(async (ctx, next) => {
                   errorMessages["password"] = langError["The password no current"];
               }
           }
-          ctx.status = 401;
+          ctx.status = 400;
           return ctx.body = { errorMessages: errorMessages};
       }else if(!e.errors && e.name !== 'ValidationError'){
           if (e.status) {

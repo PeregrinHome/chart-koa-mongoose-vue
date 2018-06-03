@@ -14,20 +14,32 @@ login.post = async function(ctx, next) {
     await passport.authenticate('local', function (err, user) {
         console.log('authenticate', user);
         if (user === false) {
-            ctx.body = { redirect: '/login', errorMessages: { login: langError["Email or password is not correct"]} };
+            ctx.statusCode = 401;
+            ctx.body = { redirect: 'login', errorMessages: { login: langError["Email or password is not correct"]} };
         } else {
             ctx.body = { redirect: '/', successMessages: { login: langSuc["You have successfully logged"] }, user:user.toWeb(), token:user.getJWT() };
         }
     })(ctx, next);
 };
+login.get = async function(ctx, next) {
+    await passport.authenticate('jwt', function (err, user, message) {
+        if (user === false) {
+            ctx.statusCode = 401;
+            ctx.body = { redirect: 'login', errorMessages: { login: langError["Login failed, please log in."]} };
+        } else {
+            ctx.body = { user:user.toWeb(), token:user.getJWT() };
+        }
+    })(ctx, next);
+};
 registration.post = async function(ctx, next) {
     let user = await User.create(ctx.request.body);
-    ctx.body = { redirect: '/login', successMessages: { registration: langSuc["Registration was successful!"] } };
+    ctx.body = { redirect: 'login', successMessages: { registration: langSuc["Registration was successful!"] } };
 };
 home.get = async function(ctx, next) {
     await passport.authenticate('jwt', function (err, user, message) {
         if (user === false) {
-            ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]} };
+            ctx.statusCode = 401;
+            ctx.body = { redirect: 'login', errorMessages: { login: langError["Login failed, please log in."]} };
         } else {
             ctx.body = { user:user.toWeb(), token:user.getJWT() };
         }
@@ -36,11 +48,12 @@ home.get = async function(ctx, next) {
 user.delete = async function(ctx, next) {
     await passport.authenticate('jwt', function (err, user, message) {
         if (user === false) {
-            ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]} };
+            ctx.statusCode = 401;
+            ctx.body = { redirect: 'login', errorMessages: { login: langError["Login failed, please log in."]} };
         } else {
             user.deleted = true;
             user.save();
-            ctx.body = { user: 'clear', redirect: '/login', message: { data: langSuc["The user is marked as deleted."] } };
+            ctx.body = { user: 'clear', redirect: 'login', message: { data: langSuc["The user is marked as deleted."] } };
         }
     })(ctx, next);
 };

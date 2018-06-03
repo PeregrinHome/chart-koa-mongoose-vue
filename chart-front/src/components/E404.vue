@@ -1,5 +1,7 @@
 <template>
-    
+    <div class="">
+        E404
+    </div>
 </template>
 
 <script>

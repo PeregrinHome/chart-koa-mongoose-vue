@@ -7,6 +7,7 @@ module.exports = {
   "Email or password is not correct": "Email или пароль не верны, пожалуйста введите верные.",
   "Login failed, please log in.": "Ошибка входа, пожалуйста авторизуйтесь.",
   "Enter a name for the data type.": "Укажите название типа данных.",
+  "You have already created such a login.": "Такой логин вами уже создан. Используйте другой.",
   "Specify the Login of the data type.": "Укажите Login типа данных.",
   "The login must be only Latin letters.": "В логине должны быть только латинские буквы.",
   "This data type login already exists": "Такой Логин типа данных уже существует, предумайте новый.",

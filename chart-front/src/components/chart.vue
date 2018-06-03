@@ -1,5 +1,7 @@
 <template>
-    
+    <div class="">
+        chart
+    </div>
 </template>
 
 <script>

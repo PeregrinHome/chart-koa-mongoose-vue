@@ -12,6 +12,7 @@ const langSuc = require('../lang/success');
 data.get = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."] }};
         } else {
             if(ctx.request.body.types && ctx.request.body.types.length > 0){
@@ -22,6 +23,7 @@ data.get = async function(ctx, next) {
 
                 if(ctx.request.body.limit){
                     if(isNaN(Number(ctx.request.body.limit)) === true || Number(ctx.request.body.offset) < 0){
+                        ctx.statusCode = 400;
                         ctx.body = { data: false, errorMessages: { data: langError["For pagination, use only numbers with a value greater than 0."] }, token: user.getJWT()};
                         return;
                     }
@@ -30,6 +32,7 @@ data.get = async function(ctx, next) {
 
                 if(ctx.request.body.offset){
                     if(isNaN(Number(ctx.request.body.offset)) === true || Number(ctx.request.body.offset) < 0){
+                        ctx.statusCode = 400;
                         ctx.body = { data: false, errorMessages: { data: langError["For pagination, use only numbers with a value greater than 0."] }, token: user.getJWT()};
                         return;
                     }
@@ -44,6 +47,7 @@ data.get = async function(ctx, next) {
                         let startEnd = { time: {} };
                         if(ctx.request.body.start){
                             if (isNaN(Date.parse(ctx.request.body.start)) === true) {
+                                ctx.statusCode = 400;
                                 ctx.body = { data: false, errorMessages: { data: langError["Specify the correct time value."] }, token: user.getJWT()};
                                 return;
                             }
@@ -51,6 +55,7 @@ data.get = async function(ctx, next) {
                         }
                         if(ctx.request.body.end){
                             if (isNaN(Date.parse(ctx.request.body.end)) === true) {
+                                ctx.statusCode = 400;
                                 ctx.body = { data: false, errorMessages: { data: langError["Specify the correct time value."] }, token: user.getJWT()};
                                 return;
                             }
@@ -64,12 +69,14 @@ data.get = async function(ctx, next) {
                         predata.docs = predata.docs.map(v=>v.toWeb());
                         data = data.concat(predata.docs);
                     }else{
+                        ctx.statusCode = 400;
                         ctx.body = { data: false, errorMessages: { data: langError["Specify the correct data types."] }, token: user.getJWT()};
                         return;
                     }
                 }
                 ctx.body = { data: data, token: user.getJWT() };
             }else{
+                ctx.statusCode = 400;
                 ctx.body = { data: false, errorMessages: { data: langError["Specify the data types."] }, token: user.getJWT() };
             }
 
@@ -79,9 +86,11 @@ data.get = async function(ctx, next) {
 data.put = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."] }};
         } else {
             if(ctx.request.body.data && ctx.request.body.data.length > 0){
+                //TODO: ВНИМАНИЕ: Дыра в безопасности, нет проверки на допустимость редактирования, на пренадлженость данных этому пользователю.
                 //TODO: Сделать обновление массовым(при таком действии возможно придется переписать валидацию в модели) и дописать положительные ответы если это необходимо.
                 for(let i = 0; i < ctx.request.body.data.length; i++){
                     if(ctx.request.body.data[i].id){
@@ -96,6 +105,7 @@ data.put = async function(ctx, next) {
 data.post = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]}};
         } else {
             if(ctx.request.body.data){
@@ -109,6 +119,7 @@ data.post = async function(ctx, next) {
                             return v;
                         }));
                     }else{
+                        ctx.statusCode = 400;
                         ctx.body = { data: false, errorMessages: { data: langError["Specify the correct data types to save the data."] }, token: user.getJWT()};
                         return;
                     }
@@ -118,6 +129,7 @@ data.post = async function(ctx, next) {
 
                 ctx.body = { data: data, message: { data: langSuc["The data was successfully added."]}, token: user.getJWT()};
             }else{
+                ctx.statusCode = 400;
                 ctx.body = { data: false, errorMessages: { data: langError["Be sure to specify the data to save."] }, token: user.getJWT()};
             }
         }
@@ -126,6 +138,7 @@ data.post = async function(ctx, next) {
 data.delete = async function(ctx, next) {
     await passport.authenticate('jwt', async function (err, user, message) {
         if (user === false) {
+            ctx.statusCode = 401;
             ctx.body = { redirect: '/login', errorMessages: { login: langError["Login failed, please log in."]}};
         } else {
             let result = true, resultDel;
@@ -148,6 +161,7 @@ data.delete = async function(ctx, next) {
             if(result){
                 ctx.body = { token: user.getJWT(), message: { data: langSuc["The removal was successful."] } };
             }else{
+                ctx.statusCode = 400;
                 ctx.body = { token: user.getJWT(), errorMessages: { data: langError["Deletion failed."] } };
             }
         }

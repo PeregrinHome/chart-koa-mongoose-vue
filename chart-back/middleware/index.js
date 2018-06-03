@@ -4,4 +4,5 @@ module.exports = function (app) {
     require('./06-json').init(app);
     require('./07-bodyParser').init(app);
     require('./11-flash').init(app);
+    require('./12-setCORS').init(app);
 };

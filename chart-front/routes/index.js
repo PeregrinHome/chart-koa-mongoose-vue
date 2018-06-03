@@ -12,47 +12,152 @@ import profile from '../src/components/profile';
 import types from '../src/components/types';
 import main from '../src/components/main';
 
-// import {store} from './store/index';
+import {store} from '../store/index';
+import {getLocalStringCrypt} from "../modules/cryptoSaveLocal";
 
 const routes = [
     {
         name: 'main',
         path: '/',
-        component: main
+        component: main,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next('login');
+                    }else{
+                        // token = store.getters('userStore/token');
+                        // console.log(token);
+                        next();
+                    }
+                });
+            }else{
+                next('login');
+            }
+        }
     },
     {
         name: 'login',
         path: '/login',
-        component: login
+        component: login,
+        beforeEnter: (to, from, next) => {
+            next();
+            // let token = getLocalStringCrypt("token");
+            // if(token){
+            //     store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+            //         if(!res.ok){
+            //             next();
+            //         }else{
+            //             next('/');
+            //         }
+            //     });
+            // }else{
+            //     next();
+            // }
+        }
     },
     {
         name: 'registration',
         path: '/registration',
-        component: registration
+        component: registration,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next();
+                    }else{
+                        next('/');
+                    }
+                });
+            }else{
+                next();
+            }
+        }
     },
     {
         name: 'chart',
         path: '/chart',
-        component: chart
+        component: chart,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next('login');
+                    }else{
+                        next();
+                    }
+                });
+            }else{
+                next('login');
+            }
+        }
     },
     {
         name: 'data',
         path: '/data',
-        component: data
+        component: data,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next('login');
+                    }else{
+                        next();
+                    }
+                });
+            }else{
+                next('login');
+            }
+        }
     },
     {
         name: 'profile',
         path: '/profile',
-        component: profile
+        component: profile,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next('login');
+                    }else{
+                        next();
+                    }
+                });
+            }else{
+                next('login');
+            }
+        }
     },
     {
         name: 'types',
         path: '/types',
-        component: types
+        component: types,
+        beforeEnter: (to, from, next) => {
+            let token = getLocalStringCrypt("token");
+            if(token){
+                store.dispatch('userStore/initWithToken', token, { root: true }).then((res)=>{
+                    if(!res.ok){
+                        next('login');
+                    }else{
+                        next();
+                    }
+                });
+            }else{
+                next('login');
+            }
+        }
     },
     {
         path: '*',
-        component: E404
+        component: E404,
+        beforeEnter: (to, from, next) => {
+            next();
+        }
     }
 ];
 
