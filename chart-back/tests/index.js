@@ -332,7 +332,7 @@ describe('RESTapi chart', () => {
                 options.body.login = 'wetness';
                 options.uri = host+'/types/'+types[0].login;
                 results = await request(options);
-                assert.equal(results.message.dataType, langSuc["You have already created such a login."]);
+                assert.equal(results.message.dataType, langError["You have already created such a login."]);
                 user.token = results.token;
             });
         });
